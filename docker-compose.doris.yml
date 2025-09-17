@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  doris:
+    image: apache/doris:3.1.0
+    container_name: langfuse-doris
+    ports:
+      - "9030:9030"  # MySQL protocol port
+      - "8040:8040"  # HTTP API port
+    environment:
+      - DORIS_ADMIN_USER=root
+      - DORIS_ADMIN_PASSWORD=root
+      - DORIS_FE_MEMORY_LIMIT=4096
+      - DORIS_BE_MEMORY_LIMIT=4096
+    volumes:
+      - doris-fe-data:/opt/doris/fe/doris-meta
+      - doris-be-data:/opt/doris/be/storage
+    networks:
+      - langfuse-network
+    healthcheck:
+      test: ["CMD", "mysql", "-h127.0.0.1", "-P9030", "-uroot", "-proot", "-e", "SHOW DATABASES"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+networks:
+  langfuse-network:
+    name: langfuse-network
+    external: true
+
+volumes:
+  doris-fe-data:
+  doris-be-data:
